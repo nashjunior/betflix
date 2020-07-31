@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import PageDefault from '../../../components/PageDefafult/index';
 import FormField from '../../../components/FormField';
-import Button from './../../../components/Button/index';
+import Button from '../../../components/Button/index';
+import useForm from './../../../hooks/useFom';
+import categoriasRepository from '../../../repositories/categorias'
 
 const CadastroCategoria = () => {
   const valoresIniciais = {
@@ -12,32 +14,14 @@ const CadastroCategoria = () => {
   };
 
   const [categorias, setCategoria] = useState([]);
-  const [values, setValues] = useState(valoresIniciais);
 
-  function handleValues(key, value) {
-    setValues({ ...values, [key]: value });
-  }
-
-  function handleEvent(event) {
-    const { name, value } = event.target;
-    handleValues(
-      name,
-      value,
-    );
-  }
+  const {
+    values, handleEvent, clearForm
+  } = useForm(valoresIniciais)
 
   useEffect(() => {
-    const URL = 'http://localhost:3030/categorias'; 
-    fetch(URL)
-       .then(async (respostaDoServer) =>{
-        if(respostaDoServer.ok) {
-          const resposta = await respostaDoServer.json();
-          setCategoria(resposta);
-          return; 
-        }
-        throw new Error('Não foi possível pegar os dados');
-       })
-  },[])
+    categoriasRepository.getAll().then(resposta => setCategoria(resposta))
+  }, []);
 
   return (
     <PageDefault>
@@ -53,8 +37,7 @@ const CadastroCategoria = () => {
           ...categorias,
           values,
         ]);
-        console.log(categorias);
-        setValues(valoresIniciais);
+        clearForm()
       }}
       >
         <FormField
@@ -83,17 +66,15 @@ const CadastroCategoria = () => {
       </form>
 
       {
-        categorias.length===0 && <div>Loading...</div>
+        categorias.length === 0 && <div>Loading...</div>
       }
 
-       <ul>
-        {categorias.map((categoria, indice) => {
-          return (
-            <li key={`${categoria}${indice}`}>
-              {categoria.nome}
-            </li>
-          )
-        })}
+      <ul>
+        {categorias.map((categoria, indice) => (
+          <li key={`${categoria}${indice}`}>
+            {categoria.titulo}
+          </li>
+        ))}
       </ul>
       <Link to="/">
         Ir para home
